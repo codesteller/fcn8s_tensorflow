@@ -13,4 +13,10 @@ Contribution to the existing repository
     * [ ] Resnet50
     * [ ] MobileNet
     * [ ] Squeezenet
+    
+### Training
+1. Create an environment with python packages from requirements file
+2. [Download pre-trained VGG-16 model](https://drive.google.com/open?id=0B0WbA4IemlxlWlpBd2NBeFUteEE)
+3. Add cityscapes dataset paths and pretrained weights path in train_config.py
+4. Start Training
 
