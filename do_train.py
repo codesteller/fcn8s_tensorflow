@@ -113,6 +113,7 @@ model = FCN8s(model_load_dir=None,
               num_classes=num_classes,
               variables_load_dir=None)
 
+
 # TODO: Define a learning rate schedule function to be passed to the `train()` method.
 def learning_rate_schedule(step):
     if step <= 10000:
@@ -146,7 +147,7 @@ model.train(train_generator=train_generator,
             monitor='loss',
             record_summaries=True,
             summaries_frequency=10,
-            summaries_dir='tensorboard_log\\cityscapes',
+            summaries_dir='./tensorboard_log/cityscapes',
             summaries_name='configuration_01',
             training_loss_display_averaging=3)
 
@@ -159,9 +160,8 @@ model.save(model_save_dir='cityscapes_model',
            include_metrics=True,
            force_save=False)
 
-
 model.evaluate(data_generator=val_generator,
                metrics={'loss', 'mean_iou', 'accuracy'},
-               num_batches=ceil(num_val_images/val_batch_size),
+               num_batches=ceil(num_val_images / val_batch_size),
                l2_regularization=0.0,
                dataset='val')

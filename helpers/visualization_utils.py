@@ -4,6 +4,7 @@ from moviepy.editor import ImageSequenceClip
 from glob import glob
 import os
 
+
 def print_segmentation_onto_image(image, prediction, color_map):
     '''
     Prints a segmentation onto an equally-sized image according to a color map.
@@ -30,7 +31,9 @@ def print_segmentation_onto_image(image, prediction, color_map):
     '''
 
     if (image.shape[0] != prediction.shape[1]) or (image.shape[1] != prediction.shape[2]):
-        raise ValueError("'image' and 'prediction' must have the same height and width, but image has spatial dimensions ({}, {}) and prediction has spatial dimensions ({}, {}).".format(image.shape[0], image.shape[1], prediction.shape[1], prediction.shape[2]))
+        raise ValueError(
+            "'image' and 'prediction' must have the same height and width, but image has spatial dimensions ({}, {}) and prediction has spatial dimensions ({}, {}).".format(
+                image.shape[0], image.shape[1], prediction.shape[1], prediction.shape[2]))
 
     image_size = image.shape
 
@@ -41,15 +44,16 @@ def print_segmentation_onto_image(image, prediction, color_map):
     # Loop over all segmentation classes that are to be annotated and put their
     # color value at the respective image pixel.
     for segmentation_class, color_value in color_map.items():
-
         mask[segmentation_map == segmentation_class] = color_value
 
     mask = scipy.misc.toimage(mask, mode="RGBA")
 
     output_image = scipy.misc.toimage(image)
-    output_image.paste(mask, box=None, mask=mask) # See http://effbot.org/imagingbook/image.htm#tag-Image.Image.paste for details.
+    output_image.paste(mask, box=None,
+                       mask=mask)  # See http://effbot.org/imagingbook/image.htm#tag-Image.Image.paste for details.
 
     return output_image
+
 
 def create_split_view(target_size, images, positions, sizes, captions=[]):
     '''
@@ -74,7 +78,9 @@ def create_split_view(target_size, images, positions, sizes, captions=[]):
         The split view image of size `target_size`.
     '''
 
-    assert len(images) == len(positions) == len(sizes), "`images`, `positions`, and `sizes` must have the same length, but it is `len(images) == {}`, `len(poisitons) = {}`, `len(sizes) == {}`".format(len(images), len(positions), len(sizes))
+    assert len(images) == len(positions) == len(
+        sizes), "`images`, `positions`, and `sizes` must have the same length, but it is `len(images) == {}`, `len(poisitons) = {}`, `len(sizes) == {}`".format(
+        len(images), len(positions), len(sizes))
 
     y_max, x_max = target_size
     canvas = np.zeros((y_max, x_max, 3), dtype=np.uint8)
@@ -94,10 +100,11 @@ def create_split_view(target_size, images, positions, sizes, captions=[]):
 
         # Print captions onto the canvas if there are any
         if captions and (captions[i] is not None):
-            cv2.putText(canvas, "{}".format(captions[i]), (x+10, y+30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.8,
-                            color=(255,255,255), thickness=2, lineType=cv2.LINE_AA)
+            cv2.putText(canvas, "{}".format(captions[i]), (x + 10, y + 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.8,
+                        color=(255, 255, 255), thickness=2, lineType=cv2.LINE_AA)
 
     return canvas
+
 
 def create_video_from_images(video_output_name, image_input_dir, frame_rate=30.0, image_file_extension='png'):
     '''

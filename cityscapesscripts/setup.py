@@ -15,8 +15,8 @@ except:
 import os
 import numpy
 
-os.environ["CC"]  = "g++"
+os.environ["CC"] = "g++"
 os.environ["CXX"] = "g++"
 
-pyxFile = os.path.join( "evaluation" , "addToConfusionMatrix.pyx" )
-setup(ext_modules = cythonize(pyxFile),include_dirs=[numpy.get_include()])
+pyxFile = os.path.join("evaluation", "addToConfusionMatrix.pyx")
+setup(ext_modules=cythonize(pyxFile), include_dirs=[numpy.get_include()])

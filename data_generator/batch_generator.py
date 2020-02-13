@@ -75,47 +75,53 @@ class BatchGenerator():
 
         self.image_dirs = image_dirs
         self.ground_truth_dirs = ground_truth_dirs
-        self.root_dir = root_dir # The dataset root directory.
+        self.root_dir = root_dir  # The dataset root directory.
         self.export_dir = export_dir
-        self.image_paths = [] # The list of images from which the generator will draw.
-        self.ground_truth_paths = {} # The dictionary of ground truth images that correspond to the images.
+        self.image_paths = []  # The list of images from which the generator will draw.
+        self.ground_truth_paths = {}  # The dictionary of ground truth images that correspond to the images.
         self.num_classes = num_classes
         self.dataset_size = 0
-        self.ground_truth = False # Whether or not ground truth images were given.
+        self.ground_truth = False  # Whether or not ground truth images were given.
 
         if (not self.ground_truth_dirs is None) and (len(self.image_dirs) != len(self.ground_truth_dirs)):
             raise ValueError("`image_dirs` and `ground_truth_dirs` must contain the same number of elements.")
 
         image_file_extension = image_file_extension.lower()
 
-        for i, image_dir in enumerate(image_dirs): # Iterate over all given datasets.
+        for i, image_dir in enumerate(image_dirs):  # Iterate over all given datasets.
 
-            for image_dir_path, subdir_list, file_list in os.walk(image_dir, topdown=True): # Iterate over all subdirectories of this dataset directory.
+            for image_dir_path, subdir_list, file_list in os.walk(image_dir,
+                                                                  topdown=True):  # Iterate over all subdirectories of this dataset directory.
 
-                image_paths = glob(os.path.join(image_dir_path, '*.' + image_file_extension)) # Get all images in this directory
+                image_paths = glob(
+                    os.path.join(image_dir_path, '*.' + image_file_extension))  # Get all images in this directory
 
-                if len(image_paths) > 0: # If there are any images, add them to the list of images.
+                if len(image_paths) > 0:  # If there are any images, add them to the list of images.
 
                     self.image_paths += image_paths
 
-                    if not ground_truth_dirs is None: # If there is ground truth data, add it to the ground truth list.
+                    if not ground_truth_dirs is None:  # If there is ground truth data, add it to the ground truth list.
                         # Get the path of the ground truth directory that corresponds to this image directory.
-                        ground_truth_dir = ground_truth_dirs[i] # Get the head.
-                        ground_truth_subdir = os.path.basename(os.path.normpath(image_dir_path)) # Get the subdirectory we're currently in.
+                        ground_truth_dir = ground_truth_dirs[i]  # Get the head.
+                        ground_truth_subdir = os.path.basename(
+                            os.path.normpath(image_dir_path))  # Get the subdirectory we're currently in.
                         ground_truth_dir_path = os.path.join(ground_truth_dir, ground_truth_subdir)
 
                         # Loop over all image paths to collect the corresponding ground truth image paths.
                         for image_path in image_paths:
                             # Construct the name of the ground truth image from the name of the image.
                             image_name = os.path.basename(image_path)
-                            left_part = image_name.split(image_name_split_separator, 1)[0] # Get the left part of the split.
+                            left_part = image_name.split(image_name_split_separator, 1)[
+                                0]  # Get the left part of the split.
                             # Compose the name of the ground truth image that corresponds to this image.
                             ground_truth_image_name = left_part + ground_truth_suffix + '.' + image_file_extension
                             # Create the full path to this ground truth image.
                             ground_truth_path = os.path.join(ground_truth_dir_path, ground_truth_image_name)
 
                             if check_existence and not os.path.isfile(ground_truth_path):
-                                raise DataError("The dataset contains an image file '{}' for which the corresponding ground truth image file does not exist at '{}'.".format(image_path, ground_truth_path))
+                                raise DataError(
+                                    "The dataset contains an image file '{}' for which the corresponding ground truth image file does not exist at '{}'.".format(
+                                        image_path, ground_truth_path))
 
                             # Add the pair `image_name : ground_truth_path` to the dictionary
                             self.ground_truth_paths[image_name] = ground_truth_path
@@ -123,10 +129,14 @@ class BatchGenerator():
         self.dataset_size = len(self.image_paths)
 
         if self.dataset_size == 0:
-            raise DataError("No images with the given file extension '{}' were found in the given image directories.".format(image_file_extension))
+            raise DataError(
+                "No images with the given file extension '{}' were found in the given image directories.".format(
+                    image_file_extension))
 
         if (not ground_truth_dirs is None) and (len(self.ground_truth_paths) != self.dataset_size):
-            raise DataError('Ground truth directories were given, but the number of ground truth images found does not match the number of images. Number of images: {}. Number of ground truth images: {}'.format(self.dataset_size, len(self.ground_truth_paths)))
+            raise DataError(
+                'Ground truth directories were given, but the number of ground truth images found does not match the number of images. Number of images: {}. Number of ground truth images: {}'.format(
+                    self.dataset_size, len(self.ground_truth_paths)))
 
         if len(self.ground_truth_paths) > 0:
             self.ground_truth = True
@@ -220,11 +230,13 @@ class BatchGenerator():
             arrays, the first is the same as in the former case and the second has shape
             `(batch_size, img_height, img_with)` and contains the generated ground truth images.
         '''
-        if (convert_to_one_hot or (not convert_colors_to_ids is False) or (not convert_ids_to_ids is False)) and not self.ground_truth:
+        if (convert_to_one_hot or (not convert_colors_to_ids is False) or (
+        not convert_ids_to_ids is False)) and not self.ground_truth:
             raise ValueError("Cannot convert ground truth data: No ground truth data given.")
 
         if convert_to_one_hot and self.num_classes is None:
-            raise ValueError("One-hot conversion requires that you pass an integer value for `num_classes` in the constructor, but `num_classes` is `None`.")
+            raise ValueError(
+                "One-hot conversion requires that you pass an integer value for `num_classes` in the constructor, but `num_classes` is `None`.")
 
         if shuffle:
             random.shuffle(self.image_paths)
@@ -243,7 +255,8 @@ class BatchGenerator():
                 current = 0
 
             # Load the images and ground truth images for this batch
-            for image_path in self.image_paths[current:current+batch_size]: # Careful: This works in Python, but might cause an 'index out of bounds' error in other languages if `current+batch_size > len(image_paths)`
+            for image_path in self.image_paths[
+                              current:current + batch_size]:  # Careful: This works in Python, but might cause an 'index out of bounds' error in other languages if `current+batch_size > len(image_paths)`
 
                 # Load the image
                 image = imageio.imread(image_path)
@@ -275,91 +288,120 @@ class BatchGenerator():
                     x_range = img_width - random_crop[1]
 
                     # Select a random crop position from the possible crop positions
-                    if y_range >= 0: crop_ymin = np.random.randint(0, y_range + 1) # There are y_range + 1 possible positions for the crop in the vertical dimension
-                    else: crop_ymin = np.random.randint(0, -y_range + 1) # The possible positions for the image on the background canvas in the vertical dimension
-                    if x_range >= 0: crop_xmin = np.random.randint(0, x_range + 1) # There are x_range + 1 possible positions for the crop in the horizontal dimension
-                    else: crop_xmin = np.random.randint(0, -x_range + 1) # The possible positions for the image on the background canvas in the horizontal dimension
+                    if y_range >= 0:
+                        crop_ymin = np.random.randint(0,
+                                                      y_range + 1)  # There are y_range + 1 possible positions for the crop in the vertical dimension
+                    else:
+                        crop_ymin = np.random.randint(0,
+                                                      -y_range + 1)  # The possible positions for the image on the background canvas in the vertical dimension
+                    if x_range >= 0:
+                        crop_xmin = np.random.randint(0,
+                                                      x_range + 1)  # There are x_range + 1 possible positions for the crop in the horizontal dimension
+                    else:
+                        crop_xmin = np.random.randint(0,
+                                                      -x_range + 1)  # The possible positions for the image on the background canvas in the horizontal dimension
                     # Perform the crop
-                    if y_range >= 0 and x_range >= 0: # If the patch to be cropped out is smaller than the original image in both dimenstions, we just perform a regular crop
+                    if y_range >= 0 and x_range >= 0:  # If the patch to be cropped out is smaller than the original image in both dimenstions, we just perform a regular crop
                         # Crop the image
-                        image = np.copy(image[crop_ymin:crop_ymin+random_crop[0], crop_xmin:crop_xmin+random_crop[1]])
+                        image = np.copy(
+                            image[crop_ymin:crop_ymin + random_crop[0], crop_xmin:crop_xmin + random_crop[1]])
                         # Do the same for the ground truth image.
-                        if self.ground_truth: gt_image = np.copy(gt_image[crop_ymin:crop_ymin+random_crop[0], crop_xmin:crop_xmin+random_crop[1]])
-                    elif y_range >= 0 and x_range < 0: # If the crop is larger than the original image in the horizontal dimension only,...
+                        if self.ground_truth: gt_image = np.copy(
+                            gt_image[crop_ymin:crop_ymin + random_crop[0], crop_xmin:crop_xmin + random_crop[1]])
+                    elif y_range >= 0 and x_range < 0:  # If the crop is larger than the original image in the horizontal dimension only,...
                         # Crop the image
-                        patch_image = np.copy(image[crop_ymin:crop_ymin+random_crop[0]]) # ...crop the vertical dimension just as before,...
-                        canvas = np.zeros(shape=(random_crop[0], random_crop[1], patch_image.shape[2]), dtype=np.uint8) # ...generate a blank background image to place the patch onto,...
-                        canvas[:, crop_xmin:crop_xmin+img_width] = patch_image # ...and place the patch onto the canvas at the random `crop_xmin` position computed above.
+                        patch_image = np.copy(image[crop_ymin:crop_ymin + random_crop[
+                            0]])  # ...crop the vertical dimension just as before,...
+                        canvas = np.zeros(shape=(random_crop[0], random_crop[1], patch_image.shape[2]),
+                                          dtype=np.uint8)  # ...generate a blank background image to place the patch onto,...
+                        canvas[:,
+                        crop_xmin:crop_xmin + img_width] = patch_image  # ...and place the patch onto the canvas at the random `crop_xmin` position computed above.
                         image = canvas
                         # Do the same for the ground truth image.
                         if self.ground_truth:
-                            patch_gt_image = np.copy(gt_image[crop_ymin:crop_ymin+random_crop[0]]) # ...crop the vertical dimension just as before,...
-                            canvas = np.full(shape=random_crop, fill_value=void_class_id, dtype=gt_dtype) # ...generate a blank background image to place the patch onto,...
-                            canvas[:, crop_xmin:crop_xmin+img_width] = patch_gt_image # ...and place the patch onto the canvas at the random `crop_xmin` position computed above.
+                            patch_gt_image = np.copy(gt_image[crop_ymin:crop_ymin + random_crop[
+                                0]])  # ...crop the vertical dimension just as before,...
+                            canvas = np.full(shape=random_crop, fill_value=void_class_id,
+                                             dtype=gt_dtype)  # ...generate a blank background image to place the patch onto,...
+                            canvas[:,
+                            crop_xmin:crop_xmin + img_width] = patch_gt_image  # ...and place the patch onto the canvas at the random `crop_xmin` position computed above.
                             gt_image = canvas
-                    elif y_range < 0 and x_range >= 0: # If the crop is larger than the original image in the vertical dimension only,...
+                    elif y_range < 0 and x_range >= 0:  # If the crop is larger than the original image in the vertical dimension only,...
                         # Crop the image
-                        patch_image = np.copy(image[:,crop_xmin:crop_xmin+random_crop[1]]) # ...crop the horizontal dimension just as in the first case,...
-                        canvas = np.zeros(shape=(random_crop[0], random_crop[1], patch_image.shape[2]), dtype=np.uint8) # ...generate a blank background image to place the patch onto,...
-                        canvas[crop_ymin:crop_ymin+img_height, :] = patch_image # ...and place the patch onto the canvas at the random `crop_ymin` position computed above.
+                        patch_image = np.copy(image[:, crop_xmin:crop_xmin + random_crop[
+                            1]])  # ...crop the horizontal dimension just as in the first case,...
+                        canvas = np.zeros(shape=(random_crop[0], random_crop[1], patch_image.shape[2]),
+                                          dtype=np.uint8)  # ...generate a blank background image to place the patch onto,...
+                        canvas[crop_ymin:crop_ymin + img_height,
+                        :] = patch_image  # ...and place the patch onto the canvas at the random `crop_ymin` position computed above.
                         image = canvas
                         # Do the same for the ground truth image.
                         if self.ground_truth:
-                            patch_gt_image = np.copy(gt_image[:,crop_xmin:crop_xmin+random_crop[1]]) # ...crop the horizontal dimension just as in the first case,...
-                            canvas = np.full(shape=random_crop, fill_value=void_class_id, dtype=gt_dtype) # ...generate a blank background image to place the patch onto,...
-                            canvas[crop_ymin:crop_ymin+img_height, :] = patch_gt_image # ...and place the patch onto the canvas at the random `crop_ymin` position computed above.
+                            patch_gt_image = np.copy(gt_image[:, crop_xmin:crop_xmin + random_crop[
+                                1]])  # ...crop the horizontal dimension just as in the first case,...
+                            canvas = np.full(shape=random_crop, fill_value=void_class_id,
+                                             dtype=gt_dtype)  # ...generate a blank background image to place the patch onto,...
+                            canvas[crop_ymin:crop_ymin + img_height,
+                            :] = patch_gt_image  # ...and place the patch onto the canvas at the random `crop_ymin` position computed above.
                             gt_image = canvas
                     else:  # If the crop is larger than the original image in both dimensions,...
                         patch_image = np.copy(image)
-                        canvas = np.zeros(shape=(random_crop[0], random_crop[1], patch_image.shape[2]), dtype=np.uint8) # ...generate a blank background image to place the patch onto,...
-                        canvas[crop_ymin:crop_ymin+img_height, crop_xmin:crop_xmin+img_width] = patch_image # ...and place the patch onto the canvas at the random `(crop_ymin, crop_xmin)` position computed above.
+                        canvas = np.zeros(shape=(random_crop[0], random_crop[1], patch_image.shape[2]),
+                                          dtype=np.uint8)  # ...generate a blank background image to place the patch onto,...
+                        canvas[crop_ymin:crop_ymin + img_height,
+                        crop_xmin:crop_xmin + img_width] = patch_image  # ...and place the patch onto the canvas at the random `(crop_ymin, crop_xmin)` position computed above.
                         image = canvas
                         # Do the same for the ground truth image.
                         if self.ground_truth:
                             patch_gt_image = np.copy(gt_image)
-                            canvas = np.full(shape=random_crop, fill_value=void_class_id, dtype=gt_dtype) # ...generate a blank background image to place the patch onto,...
-                            canvas[crop_ymin:crop_ymin+img_height, crop_xmin:crop_xmin+img_width] = patch_gt_image # ...and place the patch onto the canvas at the random `(crop_ymin, crop_xmin)` position computed above.
+                            canvas = np.full(shape=random_crop, fill_value=void_class_id,
+                                             dtype=gt_dtype)  # ...generate a blank background image to place the patch onto,...
+                            canvas[crop_ymin:crop_ymin + img_height,
+                            crop_xmin:crop_xmin + img_width] = patch_gt_image  # ...and place the patch onto the canvas at the random `(crop_ymin, crop_xmin)` position computed above.
                             gt_image = canvas
                     # Update the height and width values.
                     img_height, img_width = random_crop
 
                 if crop:
-                    image = np.copy(image[crop[0]:img_height-crop[1], crop[2]:img_width-crop[3]])
-                    gt_image = np.copy(gt_image[crop[0]:img_height-crop[1], crop[2]:img_width-crop[3]])
+                    image = np.copy(image[crop[0]:img_height - crop[1], crop[2]:img_width - crop[3]])
+                    gt_image = np.copy(gt_image[crop[0]:img_height - crop[1], crop[2]:img_width - crop[3]])
 
                 if resize:
                     image = cv2.resize(image, dsize=(resize[1], resize[0]), interpolation=cv2.INTER_LINEAR)
-                    if self.ground_truth: gt_image = cv2.resize(gt_image, dsize=(resize[1], resize[0]), interpolation=cv2.INTER_NEAREST)
-                    img_height, img_width = resize # Updating these at this point is unnecessary, but it's one fewer source of error if this method gets expanded in the future
+                    if self.ground_truth: gt_image = cv2.resize(gt_image, dsize=(resize[1], resize[0]),
+                                                                interpolation=cv2.INTER_NEAREST)
+                    img_height, img_width = resize  # Updating these at this point is unnecessary, but it's one fewer source of error if this method gets expanded in the future
 
                 if brightness:
-                    p = np.random.uniform(0,1)
-                    if p >= (1-brightness[2]):
+                    p = np.random.uniform(0, 1)
+                    if p >= (1 - brightness[2]):
                         image = _brightness(image, min=brightness[0], max=brightness[1])
 
                 if flip:
-                    p = np.random.uniform(0,1)
-                    if p >= (1-flip):
-                        image = cv2.flip(image, 1) # Horizontal flip
-                        if self.ground_truth: gt_image = cv2.flip(gt_image, 1) # Horizontal flip
+                    p = np.random.uniform(0, 1)
+                    if p >= (1 - flip):
+                        image = cv2.flip(image, 1)  # Horizontal flip
+                        if self.ground_truth: gt_image = cv2.flip(gt_image, 1)  # Horizontal flip
 
                 if translate:
-                    p = np.random.uniform(0,1)
-                    if p >= (1-translate[2]):
+                    p = np.random.uniform(0, 1)
+                    if p >= (1 - translate[2]):
                         # Randomly select horizontal and vertical shift values.
-                        x = np.random.randint(translate[0][0], translate[0][1]+1)
-                        y = np.random.randint(translate[1][0], translate[1][1]+1)
+                        x = np.random.randint(translate[0][0], translate[0][1] + 1)
+                        y = np.random.randint(translate[1][0], translate[1][1] + 1)
                         x_shift = random.choice([-x, x])
                         y_shift = random.choice([-y, y])
                         # Compute the warping matrix for the selected values.
-                        translation_matrix = np.float32([[1,0,x_shift],[0,1,y_shift]])
+                        translation_matrix = np.float32([[1, 0, x_shift], [0, 1, y_shift]])
                         # Warp the image and maybe the ground truth image.
                         image = cv2.warpAffine(src=image, M=translation_matrix, dsize=(img_width, img_height))
-                        if self.ground_truth: gt_image = cv2.warpAffine(src=gt_image, M=translation_matrix, dsize=(img_width, img_height), borderValue=void_class_id)
+                        if self.ground_truth: gt_image = cv2.warpAffine(src=gt_image, M=translation_matrix,
+                                                                        dsize=(img_width, img_height),
+                                                                        borderValue=void_class_id)
 
                 if scale:
-                    p = np.random.uniform(0,1)
-                    if p >= (1-scale[2]):
+                    p = np.random.uniform(0, 1)
+                    if p >= (1 - scale[2]):
                         scaling_factor = np.random.uniform(scale[0], scale[1])
                         scaled_height = int(img_height * scaling_factor)
                         scaled_width = int(img_width * scaling_factor)
@@ -367,23 +409,28 @@ class BatchGenerator():
                         x_offset = abs(int((img_width - scaled_width) / 2))
 
                         # Scale the image.
-                        patch_image = cv2.resize(image, dsize=(scaled_width, scaled_height), interpolation=cv2.INTER_LINEAR)
+                        patch_image = cv2.resize(image, dsize=(scaled_width, scaled_height),
+                                                 interpolation=cv2.INTER_LINEAR)
                         if scaling_factor <= 1:
                             canvas = np.zeros(shape=(img_height, img_width, img_ch), dtype=np.uint8)
-                            canvas[y_offset:y_offset+scaled_height, x_offset:x_offset+scaled_width] = patch_image
+                            canvas[y_offset:y_offset + scaled_height, x_offset:x_offset + scaled_width] = patch_image
                             image = canvas
                         if scaling_factor > 1:
-                            image = np.copy(patch_image[y_offset:img_height+y_offset, x_offset:img_width+x_offset])
+                            image = np.copy(patch_image[y_offset:img_height + y_offset, x_offset:img_width + x_offset])
 
                         # Scale the ground truth image.
                         if self.ground_truth:
-                            patch_gt_image = cv2.resize(gt_image, dsize=(scaled_width, scaled_height), interpolation=cv2.INTER_NEAREST)
+                            patch_gt_image = cv2.resize(gt_image, dsize=(scaled_width, scaled_height),
+                                                        interpolation=cv2.INTER_NEAREST)
                             if scaling_factor <= 1:
-                                canvas = np.full(shape=(img_height, img_width), fill_value=void_class_id, dtype=gt_dtype)
-                                canvas[y_offset:y_offset+scaled_height, x_offset:x_offset+scaled_width] = patch_gt_image
+                                canvas = np.full(shape=(img_height, img_width), fill_value=void_class_id,
+                                                 dtype=gt_dtype)
+                                canvas[y_offset:y_offset + scaled_height,
+                                x_offset:x_offset + scaled_width] = patch_gt_image
                                 gt_image = canvas
                             if scaling_factor > 1:
-                                gt_image = np.copy(patch_gt_image[y_offset:img_height+y_offset, x_offset:img_width+x_offset])
+                                gt_image = np.copy(
+                                    patch_gt_image[y_offset:img_height + y_offset, x_offset:img_width + x_offset])
 
                 if gray:
                     image = np.expand_dims(cv2.cvtColor(image, cv2.COLOR_RGB2GRAY), axis=2)
@@ -392,16 +439,18 @@ class BatchGenerator():
                 if convert_to_one_hot:
                     gt_image = convert_IDs_to_one_hot(gt_image, self.num_classes)
 
-                if to_disk: # If the processed data is to be written to disk instead of yieled.
+                if to_disk:  # If the processed data is to be written to disk instead of yieled.
                     # Create the directory (including parents) if it doesn't already exist.
-                    image_save_file_path = os.path.join(self.export_dir, os.path.relpath(image_path, start=self.root_dir))
+                    image_save_file_path = os.path.join(self.export_dir,
+                                                        os.path.relpath(image_path, start=self.root_dir))
                     image_save_directory_path = os.path.dirname(image_save_file_path)
                     pathlib.Path(image_save_directory_path).mkdir(parents=True, exist_ok=True)
                     # Save the image.
                     imageio.imsave(image_save_file_path, image)
                     if self.ground_truth:
                         # Create the directory (including parents) if it doesn't already exist.
-                        gt_image_save_file_path = os.path.join(self.export_dir, os.path.relpath(gt_image_path, start=self.root_dir))
+                        gt_image_save_file_path = os.path.join(self.export_dir,
+                                                               os.path.relpath(gt_image_path, start=self.root_dir))
                         gt_image_save_directory_path = os.path.dirname(gt_image_save_file_path)
                         pathlib.Path(gt_image_save_directory_path).mkdir(parents=True, exist_ok=True)
                         # Save the ground truth image.
@@ -446,28 +495,28 @@ class BatchGenerator():
         '''
 
         preprocessor = self.generate(batch_size=batch_size,
-                                convert_colors_to_ids=convert_colors_to_ids,
-                                convert_ids_to_ids=convert_ids_to_ids,
-                                convert_to_one_hot=convert_to_one_hot,
-                                void_class_id=void_class_id,
-                                random_crop=random_crop,
-                                crop=crop,
-                                resize=resize,
-                                brightness=brightness,
-                                flip=flip,
-                                translate=translate,
-                                scale=scale,
-                                gray=gray,
-                                to_disk=to_disk,
-                                shuffle=shuffle)
+                                     convert_colors_to_ids=convert_colors_to_ids,
+                                     convert_ids_to_ids=convert_ids_to_ids,
+                                     convert_to_one_hot=convert_to_one_hot,
+                                     void_class_id=void_class_id,
+                                     random_crop=random_crop,
+                                     crop=crop,
+                                     resize=resize,
+                                     brightness=brightness,
+                                     flip=flip,
+                                     translate=translate,
+                                     scale=scale,
+                                     gray=gray,
+                                     to_disk=to_disk,
+                                     shuffle=shuffle)
 
-        num_batches = ceil(self.dataset_size/batch_size)
+        num_batches = ceil(self.dataset_size / batch_size)
 
         tr = trange(num_batches, file=sys.stdout)
         tr.set_description('Processing images')
 
         for batch in tr:
-                next(preprocessor)
+            next(preprocessor)
 
 
 def _brightness(image, min=0.5, max=2.0):
@@ -476,21 +525,23 @@ def _brightness(image, min=0.5, max=2.0):
 
     Protected against overflow.
     '''
-    hsv = cv2.cvtColor(image,cv2.COLOR_RGB2HSV)
+    hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
 
-    random_br = np.random.uniform(min,max)
+    random_br = np.random.uniform(min, max)
 
-    #To protect against overflow: Calculate a mask for all pixels
-    #where adjustment of the brightness would exceed the maximum
-    #brightness value and set the value to the maximum at those pixels.
-    mask = hsv[:,:,2] * random_br > 255
-    v_channel = np.where(mask, 255, hsv[:,:,2] * random_br)
-    hsv[:,:,2] = v_channel
+    # To protect against overflow: Calculate a mask for all pixels
+    # where adjustment of the brightness would exceed the maximum
+    # brightness value and set the value to the maximum at those pixels.
+    mask = hsv[:, :, 2] * random_br > 255
+    v_channel = np.where(mask, 255, hsv[:, :, 2] * random_br)
+    hsv[:, :, 2] = v_channel
 
-    return cv2.cvtColor(hsv,cv2.COLOR_HSV2RGB)
+    return cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
+
 
 class DataError(Exception):
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
