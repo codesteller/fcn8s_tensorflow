@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def convert_IDs_to_IDs(input_array, id_map_array):
     '''
     Converts an array of integers to an array of the same shape of any numeric
@@ -22,6 +23,7 @@ def convert_IDs_to_IDs(input_array, id_map_array):
         to `id_map_array`.
     '''
     return id_map_array[input_array]
+
 
 def convert_IDs_to_IDs_partial(image, id_map_dict):
     '''
@@ -51,8 +53,8 @@ def convert_IDs_to_IDs_partial(image, id_map_dict):
 
     return canvas
 
-def convert_between_IDs_and_colors(image, color_map_dict, gt_dtype=np.uint8):
 
+def convert_between_IDs_and_colors(image, color_map_dict, gt_dtype=np.uint8):
     if len(np.squeeze(image).shape) == 3:
         canvas = np.zeros(shape=(image.shape[0], image.shape[1]), dtype=gt_dtype)
         for key, value in color_map_dict.items():
@@ -63,6 +65,7 @@ def convert_between_IDs_and_colors(image, color_map_dict, gt_dtype=np.uint8):
             canvas[image == key] = value
 
     return canvas
+
 
 def convert_IDs_to_colors(image, color_map_array):
     '''
@@ -77,12 +80,12 @@ def convert_IDs_to_colors(image, color_map_array):
 
     return color_map_array[image]
 
-def convert_one_hot_to_IDs(one_hot):
 
+def convert_one_hot_to_IDs(one_hot):
     return np.squeeze(np.argmax(one_hot, axis=-1))
 
-def convert_IDs_to_one_hot(image, num_classes):
 
+def convert_IDs_to_one_hot(image, num_classes):
     unity_vectors = np.eye(num_classes, dtype=np.bool)
 
     return unity_vectors[image]
