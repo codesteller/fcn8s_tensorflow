@@ -567,6 +567,7 @@ class FCN8s:
             tr.set_description('Epoch {}/{}'.format(epoch, epochs))
 
             for train_step in tr:
+            # for train_step in range(5):
 
                 batch_images, batch_labels = next(train_generator)
 
@@ -941,7 +942,10 @@ class FCN8s:
             else:
                 model_name += '_(eval_on_train_dataset)'
             for i in range(len(self.metric_names)):
-                model_name += '_({}-{:.4f})'.format(self.metric_names[i], self.metric_values[i])
+                try:
+                    model_name += '_({}-{:.4f})'.format(self.metric_names[i], self.metric_values[i])
+                except IndexError:
+                    model_name += '_{}'.format(time.time())
         if not (include_global_step or include_last_training_loss or include_metrics) and (name is None):
             model_name += '_{}'.format(time.time())
 

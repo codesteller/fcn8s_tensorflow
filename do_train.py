@@ -1,3 +1,7 @@
+import os
+os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   # see issue #152
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
+
 from fcn8s_tensorflow import FCN8s
 from data_generator.batch_generator import BatchGenerator
 from helpers.visualization_utils import print_segmentation_onto_image, create_video_from_images
@@ -136,7 +140,7 @@ model.train(train_generator=train_generator,
             eval_frequency=2,
             val_generator=val_generator,
             val_steps=ceil(num_val_images / val_batch_size),
-            metrics={'loss', 'mean_iou', 'accuracy'},
+            metrics=['loss', 'mean_iou', 'accuracy'],
             save_during_training=True,
             save_dir='cityscapes_model',
             save_best_only=True,
@@ -161,7 +165,7 @@ model.save(model_save_dir='cityscapes_model',
            force_save=False)
 
 model.evaluate(data_generator=val_generator,
-               metrics={'loss', 'mean_iou', 'accuracy'},
+               metrics=['loss', 'mean_iou', 'accuracy'],
                num_batches=ceil(num_val_images / val_batch_size),
                l2_regularization=0.0,
                dataset='val')
