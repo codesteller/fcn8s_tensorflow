@@ -1,7 +1,6 @@
-# import os
 # os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   # see issue #152
 # os.environ["CUDA_VISIBLE_DEVICES"]="0"
-
+import os
 from fcn8s_tensorflow import FCN8s
 from data_generator.batch_generator import BatchGenerator
 from helpers.visualization_utils import print_segmentation_onto_image, create_video_from_images
@@ -13,7 +12,7 @@ import matplotlib.pyplot as plt
 
 from train_config import train_images, val_images, test_images, train_gt, val_gt
 from train_config import num_classes, train_batch_size, val_batch_size
-from train_config import vgg_pretrained, epochs
+from train_config import vgg_pretrained, epochs, exp_name, VIZ
 
 # Put the paths to the datasets in lists, because that's what `BatchGenerator` requires as input.
 train_image_dirs = [train_images]
@@ -91,27 +90,42 @@ print('Number of ground truth images generated:', len(gt_images))
 # Visualize the dataset
 # Generate batches from the train_generator where the ground truth does not get converted to one-hot
 # so that we can plot it as images.
-example_generator = train_dataset.generate(batch_size=train_batch_size,
+if VIZ:
+    example_generator = train_dataset.generate(batch_size=train_batch_size,
                                            convert_to_one_hot=False)
 
-# Generate a batch, and visualize.
-example_images, example_gt_images = next(example_generator)
-i = 0  # Select which sample from the batch to display below.
+    # Generate a batch, and visualize.
+    example_images, example_gt_images = next(example_generator)
+    i = 0  # Select which sample from the batch to display below.
 
-figure, cells = plt.subplots(1, 2, figsize=(16, 8))
-cells[0].imshow(example_images[i])
-cells[1].imshow(example_gt_images[i])
-plt.show()
+    figure, cells = plt.subplots(1, 2, figsize=(16, 8))
+    cells[0].imshow(example_images[i])
+    cells[1].imshow(example_gt_images[i])
+    plt.show()
 
 # -----------------------------------------------------------------------------
 #                   Dataset Generator Ends
 # -----------------------------------------------------------------------------
 
+# -----------------------------------------------------------------------------
+#                   Create Experiment Directory
+#                   be carefull
+# -----------------------------------------------------------------------------
+exp_num = 1
+while (1):
+    experiment_dir = "{}_{}".format(exp_name, exp_num)
+    if os.path.exists(experiment_dir):
+        exp_num += 1
+        experiment_dir = "{}_{}".format(exp_name, exp_num)
+    else:
+        os.makedirs(experiment_dir)
+        break
 
 # -----------------------------------------------------------------------------
 #                   Create the model for Training
 # -----------------------------------------------------------------------------
-model = FCN8s(model_load_dir=None,
+model = FCN8s(experiment_dir=experiment_dir,
+              model_load_dir=None,
               tags=None,
               vgg16_dir=vgg_pretrained,
               num_classes=num_classes,
@@ -121,11 +135,11 @@ model = FCN8s(model_load_dir=None,
 # TODO: Define a learning rate schedule function to be passed to the `train()` method.
 def learning_rate_schedule(step):
     if step <= 10000:
-        return 0.0001
+        return 0.001
     elif 10000 < step <= 20000:
-        return 0.00001
+        return 0.0001
     elif 20000 < step <= 40000:
-        return 0.000003
+        return 0.00005
     else:
         return 0.000001
 
@@ -142,7 +156,7 @@ model.train(train_generator=train_generator,
             val_steps=ceil(num_val_images / val_batch_size),
             metrics=['loss', 'mean_iou', 'accuracy'],
             save_during_training=True,
-            save_dir='cityscapes_model',
+            save_dir='{}/cityscapes_model'.format(experiment_dir),
             save_best_only=True,
             save_tags=['default'],
             save_name='(batch-size-4)',
@@ -151,20 +165,21 @@ model.train(train_generator=train_generator,
             monitor='loss',
             record_summaries=True,
             summaries_frequency=10,
-            summaries_dir='./tensorboard_log/cityscapes',
+            summaries_dir='{}/tensorboard_log/cityscapes'.format(experiment_dir),
             summaries_name='configuration_01',
             training_loss_display_averaging=3)
 
-model.save(model_save_dir='cityscapes_model',
+model.save(model_save_dir='{}/cityscapes_model'.format(experiment_dir),
            saver='saved_model',
            tags=['default'],
-           name='(batch-size-4)',
+           name='(batch-size-{})'.format(train_batch_size),
            include_global_step=True,
            include_last_training_loss=True,
            include_metrics=True,
            force_save=False)
 
-model.evaluate(data_generator=val_generator,
+model.evaluate(eval_dir='{}/cityscapes_eval'.format(experiment_dir),
+               data_generator=val_generator,
                metrics=['loss', 'mean_iou', 'accuracy'],
                num_batches=ceil(num_val_images / val_batch_size),
                l2_regularization=0.0,
