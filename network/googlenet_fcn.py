@@ -732,8 +732,8 @@ class Inceptionv1FCN8s:
             tr = trange(steps_per_epoch, file=sys.stdout)
             tr.set_description('Epoch {}/{}'.format(epoch, epochs))
 
-            # for train_step in tr:
-            for train_step in range(5):
+            for train_step in tr:
+                # for train_step in range(5):
 
                 batch_images, batch_labels = next(train_generator)
 
@@ -869,8 +869,8 @@ class Inceptionv1FCN8s:
         tr.set_description(description)
 
         # Accumulate metrics in batches.
-        # for step in tr:
-        for step in range(5):
+        for step in tr:
+            # for step in range(5):
             batch_images, batch_labels = next(data_generator)
 
             self.sess.run(self.metric_update_ops,
