@@ -104,3 +104,4 @@ tensorboard_log/
 cityscapes_model/
 cityscapes_fcn_*
 test_output/
+cityscapes_eval/

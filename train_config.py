@@ -13,10 +13,12 @@ vgg_pretrained = '/home/codesteller/models/pretrained/VGG-16_mod2FCN_ImageNet-Cl
 # Set Training Hyper Parameters
 # NOTE: Learning Rate is sen by function learning_rate_schedule in do_train_vgg16fcn.py
 num_classes = 34  # TODO: Set the number of segmentation classes.
-train_batch_size = 1  # TODO: Set the training batch size.
-val_batch_size = 1  # TODO: Set the validation batch size.
-epochs = 10  # TODO: Set the number of epochs to train for.
+train_batch_size = 2  # TODO: Set the training batch size.
+val_batch_size = 2  # TODO: Set the validation batch size.
+epochs = 20  # TODO: Set the number of epochs to train for.
+keep_prob = 0.6
 
 # donot change this
-exp_name = "cityscapes_fcn"
+# exp_name = "cs_vgg16_fcn"
+exp_name = "cs_googlenet_fcn"
 VIZ = False

@@ -11,7 +11,7 @@ import time
 import matplotlib.pyplot as plt
 
 from train_config import train_images, val_images, test_images, train_gt, val_gt
-from train_config import num_classes, train_batch_size, val_batch_size
+from train_config import num_classes, train_batch_size, val_batch_size, keep_prob
 from train_config import vgg_pretrained, epochs, exp_name, VIZ
 from network.nlayers import networkConfig
 
@@ -149,7 +149,7 @@ model.train(train_generator=train_generator,
             epochs=epochs,
             steps_per_epoch=ceil(num_train_images / train_batch_size),
             learning_rate_schedule=learning_rate_schedule,
-            keep_prob=0.5,
+            keep_prob=keep_prob,
             l2_regularization=0.0,
             eval_dataset='val',
             eval_frequency=2,
@@ -171,13 +171,14 @@ model.train(train_generator=train_generator,
             training_loss_display_averaging=3)
 
 model.save(model_save_dir='{}/cityscapes_model'.format(experiment_dir),
-           saver='saved_model',
+           saver='train_saver',
            tags=['default'],
            name='(batch-size-{})'.format(train_batch_size),
            include_global_step=True,
            include_last_training_loss=True,
            include_metrics=True,
-           force_save=False)
+           force_save=False,
+           freeze_model=True)
 
 model.evaluate(eval_dir='{}/cityscapes_eval'.format(experiment_dir),
                data_generator=val_generator,
