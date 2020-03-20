@@ -1,7 +1,7 @@
 # os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 # os.environ["CUDA_VISIBLE_DEVICES"]="0"
 import os
-from network.googlenet_fcn import Inceptionv1FCN8s
+from network.vgg16_fcn8s import Vgg16FCN8s
 from data_generator.batch_generator import BatchGenerator
 from helpers.visualization_utils import print_segmentation_onto_image, create_video_from_images
 from cityscapesscripts.helpers.labels import TRAINIDS_TO_COLORS_DICT, TRAINIDS_TO_RGBA_DICT
@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 from train_config import train_images, val_images, test_images, train_gt, val_gt
 from train_config import num_classes, train_batch_size, val_batch_size
 from train_config import vgg_pretrained, epochs, exp_name, VIZ
-from network.nlayers import networkConfig
 
 # Put the paths to the datasets in lists, because that's what `BatchGenerator` requires as input.
 train_image_dirs = [train_images]
@@ -125,12 +124,12 @@ while (1):
 # -----------------------------------------------------------------------------
 #                   Create the model for Training
 # -----------------------------------------------------------------------------
-config = networkConfig()
-model = Inceptionv1FCN8s(experiment_dir=experiment_dir,
-                         exp_config=config,
-                         model_load_dir=None,
-                         tags=None,
-                         variables_load_dir=None)
+model = Vgg16FCN8s(experiment_dir=experiment_dir,
+                   model_load_dir=None,
+                   tags=None,
+                   vgg16_dir=vgg_pretrained,
+                   num_classes=num_classes,
+                   variables_load_dir=None)
 
 
 # TODO: Define a learning rate schedule function to be passed to the `train()` method.

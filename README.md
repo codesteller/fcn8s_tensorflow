@@ -5,9 +5,9 @@ This repository is forked from **pierluigiferrari/fcn8s_tensorflow.**
 Contribution to the existing repository
 
 * [x] Training script 
-* [ ] Modularize network script into core feature extractor and application network [WIP] 
-* [ ] Add multiple core networks [TO DO]
-    * [ ] GoogleNet
+* [x] Modularize network script into feature extractor and application network 
+* [ ] Add multiple core networks [WIP]
+    * [x] GoogleNet
     * [ ] Inception v2
     * [ ] Inception v3
     * [ ] Resnet50
