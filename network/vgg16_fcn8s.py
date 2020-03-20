@@ -15,7 +15,7 @@ from helpers.tf_variable_summaries import add_variable_summaries
 from helpers.visualization_utils import print_segmentation_onto_image, create_split_view
 
 
-class FCN8s:
+class Vgg16FCN8s:
 
     def __init__(self, experiment_dir, model_load_dir=None, tags=None, vgg16_dir=None, num_classes=None, variables_load_dir=None):
         '''

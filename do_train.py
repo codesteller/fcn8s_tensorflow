@@ -1,7 +1,7 @@
 # os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 # os.environ["CUDA_VISIBLE_DEVICES"]="0"
 import os
-from network.vgg16_fcn8s import FCN8s
+from network.vgg16_fcn8s import Vgg16FCN8s
 from data_generator.batch_generator import BatchGenerator
 from helpers.visualization_utils import print_segmentation_onto_image, create_video_from_images
 from cityscapesscripts.helpers.labels import TRAINIDS_TO_COLORS_DICT, TRAINIDS_TO_RGBA_DICT
@@ -124,12 +124,12 @@ while (1):
 # -----------------------------------------------------------------------------
 #                   Create the model for Training
 # -----------------------------------------------------------------------------
-model = FCN8s(experiment_dir=experiment_dir,
-              model_load_dir=None,
-              tags=None,
-              vgg16_dir=vgg_pretrained,
-              num_classes=num_classes,
-              variables_load_dir=None)
+model = Vgg16FCN8s(experiment_dir=experiment_dir,
+                   model_load_dir=None,
+                   tags=None,
+                   vgg16_dir=vgg_pretrained,
+                   num_classes=num_classes,
+                   variables_load_dir=None)
 
 
 # TODO: Define a learning rate schedule function to be passed to the `train()` method.
