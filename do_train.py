@@ -1,7 +1,7 @@
-# os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   # see issue #152
+# os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 # os.environ["CUDA_VISIBLE_DEVICES"]="0"
 import os
-from network.fcn8s_tensorflow import FCN8s
+from network.vgg16_fcn8s import FCN8s
 from data_generator.batch_generator import BatchGenerator
 from helpers.visualization_utils import print_segmentation_onto_image, create_video_from_images
 from cityscapesscripts.helpers.labels import TRAINIDS_TO_COLORS_DICT, TRAINIDS_TO_RGBA_DICT
