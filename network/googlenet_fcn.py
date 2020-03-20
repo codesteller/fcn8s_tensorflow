@@ -64,10 +64,7 @@ class Inceptionv1FCN8s:
 
         self.sess = tf.Session()
         self.g_step = None  # The global step
-        self.image_input = tf.placeholder(tf.float32, name='in_data', shape=[exp_config.batch_size,
-                                                                             exp_config.image_height,
-                                                                             exp_config.image_width,
-                                                                             exp_config.image_depth], )
+        self.image_input = tf.placeholder(tf.float32, name='in_data', shape=[None, None, None, 3], )
         self.keep_prob = tf.placeholder(tf.float32, name="keep_prob")
         # Build the part of the graph that is relevant for the training.
         self.labels = tf.placeholder(dtype=tf.int32, shape=[None, None, None, self.num_classes],

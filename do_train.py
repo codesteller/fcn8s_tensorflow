@@ -125,7 +125,7 @@ while (1):
 # -----------------------------------------------------------------------------
 #                   Create the model for Training
 # -----------------------------------------------------------------------------
-config = networkConfig()
+config = networkConfig(batch_size=train_batch_size)
 model = Inceptionv1FCN8s(experiment_dir=experiment_dir,
                          exp_config=config,
                          model_load_dir=None,
