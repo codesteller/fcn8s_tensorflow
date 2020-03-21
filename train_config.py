@@ -15,7 +15,7 @@ vgg_pretrained = '/home/codesteller/models/pretrained/VGG-16_mod2FCN_ImageNet-Cl
 num_classes = 34  # TODO: Set the number of segmentation classes.
 train_batch_size = 3  # TODO: Set the training batch size.
 val_batch_size = 3  # TODO: Set the validation batch size.
-epochs = 20  # TODO: Set the number of epochs to train for.
+epochs = 2700  # TODO: Set the number of epochs to train for.
 
 keep_prob = 0.6
 
