@@ -117,7 +117,6 @@ while (1):
     experiment_dir = "{}_{}".format(exp_name, exp_num)
     if os.path.exists(experiment_dir):
         exp_num += 1
-        experiment_dir = "{}_{}".format(exp_name, exp_num)
     else:
         os.makedirs(experiment_dir)
         break
