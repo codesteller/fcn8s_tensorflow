@@ -88,221 +88,222 @@ class Inceptionv1FCN8s:
         self.sess.run(tf.local_variables_initializer())
 
     def _core_net(self):
-        conv1_7x7_s2 = nlayers.conv2d('conv1_7x7_s2', self.image_input, 64, 7, 2)
-        pool1_3x3_s2 = nlayers.max_pool('pool1_3x3_s2', conv1_7x7_s2, 3, 2)
-        pool1_norm1 = nlayers.lrn('pool1_norm1', pool1_3x3_s2)
-        conv2_3x3_reduce = nlayers.conv2d(
-            'conv2_3x3_reduce', pool1_norm1, 64, 1, 1)
-        conv2_3x3 = nlayers.conv2d('conv2_3x3', conv2_3x3_reduce, 192, 3, 1)
-        conv2_norm2 = nlayers.lrn('conv2_norm2', conv2_3x3)
-        pool2_3x3_s2 = nlayers.max_pool('pool2_3x3_s2', conv2_norm2, 3, 2)
+        with tf.name_scope('GoogleNet_FE') as scope:
+            conv1_7x7_s2 = nlayers.conv2d(scope + '/conv1_7x7_s2', self.image_input, 64, 7, 2)
+            pool1_3x3_s2 = nlayers.max_pool(scope + '/pool1_3x3_s2', conv1_7x7_s2, 3, 2)
+            pool1_norm1 = nlayers.lrn(scope + '/pool1_norm1', pool1_3x3_s2)
+            conv2_3x3_reduce = nlayers.conv2d(
+                scope + '/conv2_3x3_reduce', pool1_norm1, 64, 1, 1)
+            conv2_3x3 = nlayers.conv2d(scope + '/conv2_3x3', conv2_3x3_reduce, 192, 3, 1)
+            conv2_norm2 = nlayers.lrn(scope + 'conv2_norm2', conv2_3x3)
+            pool2_3x3_s2 = nlayers.max_pool(scope + 'pool2_3x3_s2', conv2_norm2, 3, 2)
 
-        inception_3a_1x1 = nlayers.conv2d(
-            'inception_3a_1x1', pool2_3x3_s2, 64, 1, 1)
-        inception_3a_3x3_reduce = nlayers.conv2d(
-            'inception_3a_3x3_reduce', pool2_3x3_s2, 96, 1, 1)
-        inception_3a_3x3 = nlayers.conv2d(
-            'inception_3a_3x3', inception_3a_3x3_reduce, 128, 3, 1)
-        inception_3a_5x5_reduce = nlayers.conv2d(
-            'inception_3a_5x5_reduce', pool2_3x3_s2, 16, 1, 1)
-        inception_3a_5x5 = nlayers.conv2d(
-            'inception_3a_5x5', inception_3a_5x5_reduce, 32, 5, 1)
-        inception_3a_pool = nlayers.max_pool(
-            'inception_3a_pool', pool2_3x3_s2, 3, 1)
-        inception_3a_pool_proj = nlayers.conv2d(
-            'inception_3a_pool_proj', inception_3a_pool, 32, 1, 1)
-        inception_3a_output = nlayers.concat('inception_3a_output',
-                                             [inception_3a_1x1, inception_3a_3x3, inception_3a_5x5,
-                                              inception_3a_pool_proj])
+            inception_3a_1x1 = nlayers.conv2d(
+                scope + 'inception_3a_1x1', pool2_3x3_s2, 64, 1, 1)
+            inception_3a_3x3_reduce = nlayers.conv2d(
+                scope + 'inception_3a_3x3_reduce', pool2_3x3_s2, 96, 1, 1)
+            inception_3a_3x3 = nlayers.conv2d(
+                scope + 'inception_3a_3x3', inception_3a_3x3_reduce, 128, 3, 1)
+            inception_3a_5x5_reduce = nlayers.conv2d(
+                scope + 'inception_3a_5x5_reduce', pool2_3x3_s2, 16, 1, 1)
+            inception_3a_5x5 = nlayers.conv2d(
+                scope + 'inception_3a_5x5', inception_3a_5x5_reduce, 32, 5, 1)
+            inception_3a_pool = nlayers.max_pool(
+                scope + 'inception_3a_pool', pool2_3x3_s2, 3, 1)
+            inception_3a_pool_proj = nlayers.conv2d(
+                scope + 'inception_3a_pool_proj', inception_3a_pool, 32, 1, 1)
+            inception_3a_output = nlayers.concat(scope + 'inception_3a_output',
+                                                 [inception_3a_1x1, inception_3a_3x3, inception_3a_5x5,
+                                                  inception_3a_pool_proj])
 
-        inception_3b_1x1 = nlayers.conv2d(
-            'inception_3b_1x1', inception_3a_output, 128, 1, 1)
-        inception_3b_3x3_reduce = nlayers.conv2d(
-            'inception_3b_3x3_reduce', inception_3a_output, 128, 1, 1)
-        inception_3b_3x3 = nlayers.conv2d(
-            'inception_3b_3x3', inception_3b_3x3_reduce, 192, 3, 1)
-        inception_3b_5x5_reduce = nlayers.conv2d(
-            'inception_3b_5x5_reduce', inception_3a_output, 32, 1, 1)
-        inception_3b_5x5 = nlayers.conv2d(
-            'inception_3b_5x5', inception_3b_5x5_reduce, 96, 5, 1)
-        inception_3b_pool = nlayers.max_pool(
-            'inception_3b_pool', inception_3a_output, 3, 1)
-        inception_3b_pool_proj = nlayers.conv2d(
-            'inception_3b_pool_proj', inception_3b_pool, 64, 1, 1)
-        inception_3b_output = nlayers.concat('inception_3b_output',
-                                             [inception_3b_1x1, inception_3b_3x3, inception_3b_5x5,
-                                              inception_3b_pool_proj])
+            inception_3b_1x1 = nlayers.conv2d(
+                scope + 'inception_3b_1x1', inception_3a_output, 128, 1, 1)
+            inception_3b_3x3_reduce = nlayers.conv2d(
+                scope + 'inception_3b_3x3_reduce', inception_3a_output, 128, 1, 1)
+            inception_3b_3x3 = nlayers.conv2d(
+                scope + 'inception_3b_3x3', inception_3b_3x3_reduce, 192, 3, 1)
+            inception_3b_5x5_reduce = nlayers.conv2d(
+                scope + 'inception_3b_5x5_reduce', inception_3a_output, 32, 1, 1)
+            inception_3b_5x5 = nlayers.conv2d(
+                scope + 'inception_3b_5x5', inception_3b_5x5_reduce, 96, 5, 1)
+            inception_3b_pool = nlayers.max_pool(
+                scope + 'inception_3b_pool', inception_3a_output, 3, 1)
+            inception_3b_pool_proj = nlayers.conv2d(
+                scope + 'inception_3b_pool_proj', inception_3b_pool, 64, 1, 1)
+            inception_3b_output = nlayers.concat(scope + 'inception_3b_output',
+                                                 [inception_3b_1x1, inception_3b_3x3, inception_3b_5x5,
+                                                  inception_3b_pool_proj])
 
-        pool3_3x3_s2 = nlayers.max_pool(
-            'pool3_3x3_s2', inception_3b_output, 3, 2)
-        inception_4a_1x1 = nlayers.conv2d(
-            'inception_4a_1x1', pool3_3x3_s2, 192, 1, 1)
-        inception_4a_3x3_reduce = nlayers.conv2d(
-            'inception_4a_3x3_reduce', pool3_3x3_s2, 96, 1, 1)
-        inception_4a_3x3 = nlayers.conv2d(
-            'inception_4a_3x3', inception_4a_3x3_reduce, 208, 3, 1)
-        inception_4a_5x5_reduce = nlayers.conv2d(
-            'inception_4a_5x5_reduce', pool3_3x3_s2, 16, 1, 1)
-        inception_4a_5x5 = nlayers.conv2d(
-            'inception_4a_5x5', inception_4a_5x5_reduce, 48, 5, 1)
-        inception_4a_pool = nlayers.max_pool(
-            'inception_4a_pool', pool3_3x3_s2, 3, 1)
-        inception_4a_pool_proj = nlayers.conv2d(
-            'inception_4a_pool_proj', inception_4a_pool, 64, 1, 1)
-        inception_4a_output = nlayers.concat('inception_4a_output',
-                                             [inception_4a_1x1, inception_4a_3x3, inception_4a_5x5,
-                                              inception_4a_pool_proj])
+            pool3_3x3_s2 = nlayers.max_pool(
+                scope + 'pool3_3x3_s2', inception_3b_output, 3, 2)
+            inception_4a_1x1 = nlayers.conv2d(
+                scope + 'inception_4a_1x1', pool3_3x3_s2, 192, 1, 1)
+            inception_4a_3x3_reduce = nlayers.conv2d(
+                scope + 'inception_4a_3x3_reduce', pool3_3x3_s2, 96, 1, 1)
+            inception_4a_3x3 = nlayers.conv2d(
+                scope + 'inception_4a_3x3', inception_4a_3x3_reduce, 208, 3, 1)
+            inception_4a_5x5_reduce = nlayers.conv2d(
+                scope + 'inception_4a_5x5_reduce', pool3_3x3_s2, 16, 1, 1)
+            inception_4a_5x5 = nlayers.conv2d(
+                scope + 'inception_4a_5x5', inception_4a_5x5_reduce, 48, 5, 1)
+            inception_4a_pool = nlayers.max_pool(
+                scope + 'inception_4a_pool', pool3_3x3_s2, 3, 1)
+            inception_4a_pool_proj = nlayers.conv2d(
+                scope + 'inception_4a_pool_proj', inception_4a_pool, 64, 1, 1)
+            inception_4a_output = nlayers.concat(scope + 'inception_4a_output',
+                                                 [inception_4a_1x1, inception_4a_3x3, inception_4a_5x5,
+                                                  inception_4a_pool_proj])
 
-        inception_4b_1x1 = nlayers.conv2d(
-            'inception_4b_1x1', inception_4a_output, 160, 1, 1)
-        inception_4b_3x3_reduce = nlayers.conv2d(
-            'inception_4b_3x3_reduce', inception_4a_output, 112, 1, 1)
-        inception_4b_3x3 = nlayers.conv2d(
-            'inception_4b_3x3', inception_4b_3x3_reduce, 224, 3, 1)
-        inception_4b_5x5_reduce = nlayers.conv2d(
-            'inception_4b_5x5_reduce', inception_4a_output, 24, 1, 1)
-        inception_4b_5x5 = nlayers.conv2d(
-            'inception_4b_5x5', inception_4b_5x5_reduce, 64, 5, 1)
-        inception_4b_pool = nlayers.max_pool(
-            'inception_4b_pool', inception_4a_output, 3, 1)
-        inception_4b_pool_proj = nlayers.conv2d(
-            'inception_4b_pool_proj', inception_4b_pool, 64, 1, 1)
-        inception_4b_output = nlayers.concat('inception_4b_output',
-                                             [inception_4b_1x1, inception_4b_3x3, inception_4b_5x5,
-                                              inception_4b_pool_proj])
+            inception_4b_1x1 = nlayers.conv2d(
+                scope + 'inception_4b_1x1', inception_4a_output, 160, 1, 1)
+            inception_4b_3x3_reduce = nlayers.conv2d(
+                scope + 'inception_4b_3x3_reduce', inception_4a_output, 112, 1, 1)
+            inception_4b_3x3 = nlayers.conv2d(
+                scope + 'inception_4b_3x3', inception_4b_3x3_reduce, 224, 3, 1)
+            inception_4b_5x5_reduce = nlayers.conv2d(
+                scope + 'inception_4b_5x5_reduce', inception_4a_output, 24, 1, 1)
+            inception_4b_5x5 = nlayers.conv2d(
+                scope + 'inception_4b_5x5', inception_4b_5x5_reduce, 64, 5, 1)
+            inception_4b_pool = nlayers.max_pool(
+                scope + 'inception_4b_pool', inception_4a_output, 3, 1)
+            inception_4b_pool_proj = nlayers.conv2d(
+                scope + 'inception_4b_pool_proj', inception_4b_pool, 64, 1, 1)
+            inception_4b_output = nlayers.concat(scope + 'inception_4b_output',
+                                                 [inception_4b_1x1, inception_4b_3x3, inception_4b_5x5,
+                                                  inception_4b_pool_proj])
 
-        inception_4c_1x1 = nlayers.conv2d(
-            'inception_4c_1x1', inception_4b_output, 128, 1, 1)
-        inception_4c_3x3_reduce = nlayers.conv2d(
-            'inception_4c_3x3_reduce', inception_4b_output, 128, 1, 1)
-        inception_4c_3x3 = nlayers.conv2d(
-            'inception_4c_3x3', inception_4c_3x3_reduce, 256, 3, 1)
-        inception_4c_5x5_reduce = nlayers.conv2d(
-            'inception_4c_5x5_reduce', inception_4b_output, 24, 1, 1)
-        inception_4c_5x5 = nlayers.conv2d(
-            'inception_4c_5x5', inception_4c_5x5_reduce, 64, 5, 1)
-        inception_4c_pool = nlayers.max_pool(
-            'inception_4c_pool', inception_4b_output, 3, 1)
-        inception_4c_pool_proj = nlayers.conv2d(
-            'inception_4c_pool_proj', inception_4c_pool, 64, 1, 1)
-        inception_4c_output = nlayers.concat('inception_4c_output',
-                                             [inception_4c_1x1, inception_4c_3x3, inception_4c_5x5,
-                                              inception_4c_pool_proj])
+            inception_4c_1x1 = nlayers.conv2d(
+                scope + 'inception_4c_1x1', inception_4b_output, 128, 1, 1)
+            inception_4c_3x3_reduce = nlayers.conv2d(
+                scope + 'inception_4c_3x3_reduce', inception_4b_output, 128, 1, 1)
+            inception_4c_3x3 = nlayers.conv2d(
+                scope + 'inception_4c_3x3', inception_4c_3x3_reduce, 256, 3, 1)
+            inception_4c_5x5_reduce = nlayers.conv2d(
+                scope + 'inception_4c_5x5_reduce', inception_4b_output, 24, 1, 1)
+            inception_4c_5x5 = nlayers.conv2d(
+                scope + 'inception_4c_5x5', inception_4c_5x5_reduce, 64, 5, 1)
+            inception_4c_pool = nlayers.max_pool(
+                scope + 'inception_4c_pool', inception_4b_output, 3, 1)
+            inception_4c_pool_proj = nlayers.conv2d(
+                scope + 'inception_4c_pool_proj', inception_4c_pool, 64, 1, 1)
+            inception_4c_output = nlayers.concat(scope + 'inception_4c_output',
+                                                 [inception_4c_1x1, inception_4c_3x3, inception_4c_5x5,
+                                                  inception_4c_pool_proj])
 
-        inception_4d_1x1 = nlayers.conv2d(
-            'inception_4d_1x1', inception_4c_output, 112, 1, 1)
-        inception_4d_3x3_reduce = nlayers.conv2d(
-            'inception_4d_3x3_reduce', inception_4c_output, 144, 1, 1)
-        inception_4d_3x3 = nlayers.conv2d(
-            'inception_4d_3x3', inception_4d_3x3_reduce, 288, 3, 1)
-        inception_4d_5x5_reduce = nlayers.conv2d(
-            'inception_4d_5x5_reduce', inception_4c_output, 32, 1, 1)
-        inception_4d_5x5 = nlayers.conv2d(
-            'inception_4d_5x5', inception_4d_5x5_reduce, 64, 5, 1)
-        inception_4d_pool = nlayers.max_pool(
-            'inception_4d_pool', inception_4c_output, 3, 1)
-        inception_4d_pool_proj = nlayers.conv2d(
-            'inception_4d_pool_proj', inception_4d_pool, 64, 1, 1)
-        inception_4d_output = nlayers.concat('inception_4d_output',
-                                             [inception_4d_1x1, inception_4d_3x3, inception_4d_5x5,
-                                              inception_4d_pool_proj])
+            inception_4d_1x1 = nlayers.conv2d(
+                scope + 'inception_4d_1x1', inception_4c_output, 112, 1, 1)
+            inception_4d_3x3_reduce = nlayers.conv2d(
+                scope + 'inception_4d_3x3_reduce', inception_4c_output, 144, 1, 1)
+            inception_4d_3x3 = nlayers.conv2d(
+                scope + 'inception_4d_3x3', inception_4d_3x3_reduce, 288, 3, 1)
+            inception_4d_5x5_reduce = nlayers.conv2d(
+                scope + 'inception_4d_5x5_reduce', inception_4c_output, 32, 1, 1)
+            inception_4d_5x5 = nlayers.conv2d(
+                scope + 'inception_4d_5x5', inception_4d_5x5_reduce, 64, 5, 1)
+            inception_4d_pool = nlayers.max_pool(
+                scope + 'inception_4d_pool', inception_4c_output, 3, 1)
+            inception_4d_pool_proj = nlayers.conv2d(
+                scope + 'inception_4d_pool_proj', inception_4d_pool, 64, 1, 1)
+            inception_4d_output = nlayers.concat(scope + 'inception_4d_output',
+                                                 [inception_4d_1x1, inception_4d_3x3, inception_4d_5x5,
+                                                  inception_4d_pool_proj])
 
-        inception_4e_1x1 = nlayers.conv2d(
-            'inception_4e_1x1', inception_4d_output, 256, 1, 1)
-        inception_4e_3x3_reduce = nlayers.conv2d(
-            'inception_4e_3x3_reduce', inception_4d_output, 160, 1, 1)
-        inception_4e_3x3 = nlayers.conv2d(
-            'inception_4e_3x3', inception_4e_3x3_reduce, 320, 3, 1)
-        inception_4e_5x5_reduce = nlayers.conv2d(
-            'inception_4e_5x5_reduce', inception_4d_output, 32, 1, 1)
-        inception_4e_5x5 = nlayers.conv2d(
-            'inception_4e_5x5', inception_4e_5x5_reduce, 128, 5, 1)
-        inception_4e_pool = nlayers.max_pool(
-            'inception_4e_pool', inception_4d_output, 3, 1)
-        inception_4e_pool_proj = nlayers.conv2d(
-            'inception_4e_pool_proj', inception_4e_pool, 128, 1, 1)
-        inception_4e_output = nlayers.concat('inception_4e_output',
-                                             [inception_4e_1x1, inception_4e_3x3, inception_4e_5x5,
-                                              inception_4e_pool_proj])
+            inception_4e_1x1 = nlayers.conv2d(
+                scope + 'inception_4e_1x1', inception_4d_output, 256, 1, 1)
+            inception_4e_3x3_reduce = nlayers.conv2d(
+                scope + 'inception_4e_3x3_reduce', inception_4d_output, 160, 1, 1)
+            inception_4e_3x3 = nlayers.conv2d(
+                scope + 'inception_4e_3x3', inception_4e_3x3_reduce, 320, 3, 1)
+            inception_4e_5x5_reduce = nlayers.conv2d(
+                scope + 'inception_4e_5x5_reduce', inception_4d_output, 32, 1, 1)
+            inception_4e_5x5 = nlayers.conv2d(
+                scope + 'inception_4e_5x5', inception_4e_5x5_reduce, 128, 5, 1)
+            inception_4e_pool = nlayers.max_pool(
+                scope + 'inception_4e_pool', inception_4d_output, 3, 1)
+            inception_4e_pool_proj = nlayers.conv2d(
+                scope + 'inception_4e_pool_proj', inception_4e_pool, 128, 1, 1)
+            inception_4e_output = nlayers.concat(scope + 'inception_4e_output',
+                                                 [inception_4e_1x1, inception_4e_3x3, inception_4e_5x5,
+                                                  inception_4e_pool_proj])
 
-        pool4_3x3_s2 = nlayers.max_pool(
-            'pool4_3x3_s2', inception_4e_output, 3, 2)
-        inception_5a_1x1 = nlayers.conv2d(
-            'inception_5a_1x1', pool4_3x3_s2, 256, 1, 1)
-        inception_5a_3x3_reduce = nlayers.conv2d(
-            'inception_5a_3x3_reduce', pool4_3x3_s2, 160, 1, 1)
-        inception_5a_3x3 = nlayers.conv2d(
-            'inception_5a_3x3', inception_5a_3x3_reduce, 320, 3, 1)
-        inception_5a_5x5_reduce = nlayers.conv2d(
-            'inception_5a_5x5_reduce', pool4_3x3_s2, 32, 1, 1)
-        inception_5a_5x5 = nlayers.conv2d(
-            'inception_5a_5x5', inception_5a_5x5_reduce, 128, 5, 1)
-        inception_5a_pool = nlayers.max_pool(
-            'inception_5a_pool', pool4_3x3_s2, 3, 1)
-        inception_5a_pool_proj = nlayers.conv2d(
-            'inception_5a_pool_proj', inception_5a_pool, 128, 1, 1)
-        inception_5a_output = nlayers.concat('inception_5a_output',
-                                             [inception_5a_1x1, inception_5a_3x3, inception_5a_5x5,
-                                              inception_5a_pool_proj])
+            pool4_3x3_s2 = nlayers.max_pool(
+                scope + 'pool4_3x3_s2', inception_4e_output, 3, 2)
+            inception_5a_1x1 = nlayers.conv2d(
+                scope + 'inception_5a_1x1', pool4_3x3_s2, 256, 1, 1)
+            inception_5a_3x3_reduce = nlayers.conv2d(
+                scope + 'inception_5a_3x3_reduce', pool4_3x3_s2, 160, 1, 1)
+            inception_5a_3x3 = nlayers.conv2d(
+                scope + 'inception_5a_3x3', inception_5a_3x3_reduce, 320, 3, 1)
+            inception_5a_5x5_reduce = nlayers.conv2d(
+                scope + 'inception_5a_5x5_reduce', pool4_3x3_s2, 32, 1, 1)
+            inception_5a_5x5 = nlayers.conv2d(
+                scope + 'inception_5a_5x5', inception_5a_5x5_reduce, 128, 5, 1)
+            inception_5a_pool = nlayers.max_pool(
+                scope + 'inception_5a_pool', pool4_3x3_s2, 3, 1)
+            inception_5a_pool_proj = nlayers.conv2d(
+                scope + 'inception_5a_pool_proj', inception_5a_pool, 128, 1, 1)
+            inception_5a_output = nlayers.concat(scope + 'inception_5a_output',
+                                                 [inception_5a_1x1, inception_5a_3x3, inception_5a_5x5,
+                                                  inception_5a_pool_proj])
 
-        inception_5b_1x1 = nlayers.conv2d(
-            'inception_5b_1x1', inception_5a_output, 384, 1, 1)
-        inception_5b_3x3_reduce = nlayers.conv2d(
-            'inception_5b_3x3_reduce', inception_5a_output, 192, 1, 1)
-        inception_5b_3x3 = nlayers.conv2d(
-            'inception_5b_3x3', inception_5b_3x3_reduce, 384, 3, 1)
-        inception_5b_5x5_reduce = nlayers.conv2d(
-            'inception_5b_5x5_reduce', inception_5a_output, 48, 1, 1)
-        inception_5b_5x5 = nlayers.conv2d(
-            'inception_5b_5x5', inception_5b_5x5_reduce, 128, 5, 1)
-        inception_5b_pool = nlayers.max_pool(
-            'inception_5b_pool', inception_5a_output, 3, 1)
-        inception_5b_pool_proj = nlayers.conv2d(
-            'inception_5b_pool_proj', inception_5b_pool, 128, 1, 1)
-        inception_5b_output = nlayers.concat('inception_5b_output',
-                                             [inception_5b_1x1, inception_5b_3x3, inception_5b_5x5,
-                                              inception_5b_pool_proj])
+            inception_5b_1x1 = nlayers.conv2d(
+                scope + 'inception_5b_1x1', inception_5a_output, 384, 1, 1)
+            inception_5b_3x3_reduce = nlayers.conv2d(
+                scope + 'inception_5b_3x3_reduce', inception_5a_output, 192, 1, 1)
+            inception_5b_3x3 = nlayers.conv2d(
+                scope + 'inception_5b_3x3', inception_5b_3x3_reduce, 384, 3, 1)
+            inception_5b_5x5_reduce = nlayers.conv2d(
+                scope + 'inception_5b_5x5_reduce', inception_5a_output, 48, 1, 1)
+            inception_5b_5x5 = nlayers.conv2d(
+                scope + 'inception_5b_5x5', inception_5b_5x5_reduce, 128, 5, 1)
+            inception_5b_pool = nlayers.max_pool(
+                scope + 'inception_5b_pool', inception_5a_output, 3, 1)
+            inception_5b_pool_proj = nlayers.conv2d(
+                scope + 'inception_5b_pool_proj', inception_5b_pool, 128, 1, 1)
+            inception_5b_output = nlayers.concat(scope + 'inception_5b_output',
+                                                 [inception_5b_1x1, inception_5b_3x3, inception_5b_5x5,
+                                                  inception_5b_pool_proj])
 
-        pool5_3x3_s2 = nlayers.max_pool(
-            'pool5_3x3_s2', inception_5b_output, 3, 2)
-        inception_6a_1x1 = nlayers.conv2d(
-            'inception_6a_1x1', pool5_3x3_s2, 256, 1, 1)
-        inception_6a_3x3_reduce = nlayers.conv2d(
-            'inception_6a_3x3_reduce', pool5_3x3_s2, 160, 1, 1)
-        inception_6a_3x3 = nlayers.conv2d(
-            'inception_6a_3x3', inception_6a_3x3_reduce, 320, 3, 1)
-        inception_6a_5x5_reduce = nlayers.conv2d(
-            'inception_6a_5x5_reduce', pool5_3x3_s2, 32, 1, 1)
-        inception_6a_5x5 = nlayers.conv2d(
-            'inception_6a_5x5', inception_6a_5x5_reduce, 128, 5, 1)
-        inception_6a_pool = nlayers.max_pool(
-            'inception_6a_pool', pool5_3x3_s2, 3, 1)
-        inception_6a_pool_proj = nlayers.conv2d(
-            'inception_6a_pool_proj', inception_6a_pool, 128, 1, 1)
-        inception_6a_output = nlayers.concat('inception_6a_output',
-                                             [inception_6a_1x1, inception_6a_3x3, inception_6a_5x5,
-                                              inception_6a_pool_proj])
+            pool5_3x3_s2 = nlayers.max_pool(
+                scope + 'pool5_3x3_s2', inception_5b_output, 3, 2)
+            inception_6a_1x1 = nlayers.conv2d(
+                scope + 'inception_6a_1x1', pool5_3x3_s2, 256, 1, 1)
+            inception_6a_3x3_reduce = nlayers.conv2d(
+                scope + 'inception_6a_3x3_reduce', pool5_3x3_s2, 160, 1, 1)
+            inception_6a_3x3 = nlayers.conv2d(
+                scope + 'inception_6a_3x3', inception_6a_3x3_reduce, 320, 3, 1)
+            inception_6a_5x5_reduce = nlayers.conv2d(
+                scope + 'inception_6a_5x5_reduce', pool5_3x3_s2, 32, 1, 1)
+            inception_6a_5x5 = nlayers.conv2d(
+                scope + 'inception_6a_5x5', inception_6a_5x5_reduce, 128, 5, 1)
+            inception_6a_pool = nlayers.max_pool(
+                scope + 'inception_6a_pool', pool5_3x3_s2, 3, 1)
+            inception_6a_pool_proj = nlayers.conv2d(
+                scope + 'inception_6a_pool_proj', inception_6a_pool, 128, 1, 1)
+            inception_6a_output = nlayers.concat(scope + 'inception_6a_output',
+                                                 [inception_6a_1x1, inception_6a_3x3, inception_6a_5x5,
+                                                  inception_6a_pool_proj])
 
-        inception_6b_1x1 = nlayers.conv2d(
-            'inception_6b_1x1', inception_6a_output, 384, 1, 1)
-        inception_6b_3x3_reduce = nlayers.conv2d(
-            'inception_6b_3x3_reduce', inception_6a_output, 192, 1, 1)
-        inception_6b_3x3 = nlayers.conv2d(
-            'inception_6b_3x3', inception_6b_3x3_reduce, 384, 3, 1)
-        inception_6b_5x5_reduce = nlayers.conv2d(
-            'inception_6b_5x5_reduce', inception_6a_output, 48, 1, 1)
-        inception_6b_5x5 = nlayers.conv2d(
-            'inception_6b_5x5', inception_6b_5x5_reduce, 128, 5, 1)
-        inception_6b_pool = nlayers.max_pool(
-            'inception_6b_pool', inception_6a_output, 3, 1)
-        inception_6b_pool_proj = nlayers.conv2d(
-            'inception_6b_pool_proj', inception_6b_pool, 128, 1, 1)
-        inception_6b_output = nlayers.concat('inception_6b_output',
-                                             [inception_6b_1x1, inception_6b_3x3, inception_6b_5x5,
-                                              inception_6b_pool_proj])
-        pool6_drop_7x7_s1 = nlayers.dropout('pool6_drop_7x7_s1', inception_6b_output, keep_prob=self.keep_prob)
+            inception_6b_1x1 = nlayers.conv2d(
+                scope + 'inception_6b_1x1', inception_6a_output, 384, 1, 1)
+            inception_6b_3x3_reduce = nlayers.conv2d(
+                scope + 'inception_6b_3x3_reduce', inception_6a_output, 192, 1, 1)
+            inception_6b_3x3 = nlayers.conv2d(
+                scope + 'inception_6b_3x3', inception_6b_3x3_reduce, 384, 3, 1)
+            inception_6b_5x5_reduce = nlayers.conv2d(
+                scope + 'inception_6b_5x5_reduce', inception_6a_output, 48, 1, 1)
+            inception_6b_5x5 = nlayers.conv2d(
+                scope + 'inception_6b_5x5', inception_6b_5x5_reduce, 128, 5, 1)
+            inception_6b_pool = nlayers.max_pool(
+                scope + 'inception_6b_pool', inception_6a_output, 3, 1)
+            inception_6b_pool_proj = nlayers.conv2d(
+                scope + 'inception_6b_pool_proj', inception_6b_pool, 128, 1, 1)
+            inception_6b_output = nlayers.concat(scope + 'inception_6b_output',
+                                                 [inception_6b_1x1, inception_6b_3x3, inception_6b_5x5,
+                                                  inception_6b_pool_proj])
+            pool6_drop_7x7_s1 = nlayers.dropout('pool6_drop_7x7_s1', inception_6b_output, keep_prob=self.keep_prob)
 
-        return [pool6_drop_7x7_s1, inception_5b_output, inception_4e_output, inception_3b_output]
+            return [pool6_drop_7x7_s1, inception_5b_output, inception_4e_output, inception_3b_output]
 
     def _build_decoder(self, tap_layers):
         """
@@ -316,7 +317,7 @@ class Inceptionv1FCN8s:
                                                 name='l2_regularization_rate')  # L2 regularization rate for the kernels
 
         # first decode layer
-        with tf.name_scope('decoder_0'):
+        with tf.name_scope('decoder') as scope:
             first_encode_layer = tap_layers[0]
             # Reduce channels to 19
             classifier_64s = tf.layers.conv2d(inputs=first_encode_layer,
@@ -327,7 +328,7 @@ class Inceptionv1FCN8s:
                                               kernel_initializer=tf.truncated_normal_initializer(stddev=stddev_1x1),
                                               kernel_regularizer=tf.contrib.layers.l2_regularizer(
                                                   l2_regularization_rate),
-                                              name='classifier_64s')
+                                              name=scope + 'classifier_64s')
             # Upscale to 2x resolution
             upscale_32s = tf.layers.conv2d_transpose(inputs=classifier_64s,
                                                      filters=self.config.n_classes,
@@ -338,7 +339,7 @@ class Inceptionv1FCN8s:
                                                          stddev=stddev_conv2d_trans),
                                                      kernel_regularizer=tf.contrib.layers.l2_regularizer(
                                                          l2_regularization_rate),
-                                                     name='upscale_32s')
+                                                     name=scope + 'upscale_32s')
 
             second_encode_layer = tap_layers[1]
             # Reduce channels to 19
@@ -350,11 +351,11 @@ class Inceptionv1FCN8s:
                                               kernel_initializer=tf.truncated_normal_initializer(stddev=stddev_1x1),
                                               kernel_regularizer=tf.contrib.layers.l2_regularizer(
                                                   l2_regularization_rate),
-                                              name='classifier_32s')
+                                              name=scope +'classifier_32s')
 
             # 2: fuse until we're back at the original image size.
 
-            fuse_32s = tf.add(upscale_32s, classifier_32s, name='fuse_32s')
+            fuse_32s = tf.add(upscale_32s, classifier_32s, name=scope +'fuse_32s')
 
             # second decode layer
             # Upscale to 2x resolution
@@ -367,7 +368,7 @@ class Inceptionv1FCN8s:
                                                          stddev=stddev_conv2d_trans),
                                                      kernel_regularizer=tf.contrib.layers.l2_regularizer(
                                                          l2_regularization_rate),
-                                                     name='upscale_16s')
+                                                     name=scope +'upscale_16s')
 
             # Reduce channels to 19
             classifier_16s = tf.layers.conv2d(inputs=tap_layers[2],
@@ -378,10 +379,10 @@ class Inceptionv1FCN8s:
                                               kernel_initializer=tf.truncated_normal_initializer(stddev=stddev_1x1),
                                               kernel_regularizer=tf.contrib.layers.l2_regularizer(
                                                   l2_regularization_rate),
-                                              name='classifier_16s')
+                                              name=scope +'classifier_16s')
 
             # 2: fuse until we're back at the original image size.
-            fuse_16s = tf.add(upscale_16s, classifier_16s, name='fuse_16s')
+            fuse_16s = tf.add(upscale_16s, classifier_16s, name=scope +'fuse_16s')
 
             # Third decode layer
             # Upscale to 2x resolution
@@ -394,7 +395,7 @@ class Inceptionv1FCN8s:
                                                         stddev=stddev_conv2d_trans),
                                                     kernel_regularizer=tf.contrib.layers.l2_regularizer(
                                                         l2_regularization_rate),
-                                                    name='upscale_8s')
+                                                    name=scope +'upscale_8s')
 
             # Reduce channels to 19
             classifier_8s = tf.layers.conv2d(inputs=tap_layers[3],
@@ -406,10 +407,10 @@ class Inceptionv1FCN8s:
                                                  stddev=stddev_1x1),
                                              kernel_regularizer=tf.contrib.layers.l2_regularizer(
                                                  l2_regularization_rate),
-                                             name='classifier_8s')
+                                             name=scope +'classifier_8s')
 
             # 2: fuse until we're back at the original image size.
-            fuse_8s = tf.add(upscale_8s, classifier_8s, name='fuse_8s')
+            fuse_8s = tf.add(upscale_8s, classifier_8s, name=scope +'fuse_8s')
 
             # Forth decode layer
             # Upscale to 2x resolution
@@ -422,32 +423,33 @@ class Inceptionv1FCN8s:
                                                         stddev=stddev_conv2d_trans),
                                                     kernel_regularizer=tf.contrib.layers.l2_regularizer(
                                                         l2_regularization_rate),
-                                                    name='upscale_1s')
-            fcn8s_output = tf.identity(upscale_1s, name='fcn8s_output')
-        return fcn8s_output, l2_regularization_rate
+                                                    name=scope +'upscale_1s')
+            fcn8s_output = tf.identity(upscale_1s, name=scope +'fcn8s_output')
+            return fcn8s_output, l2_regularization_rate
 
     def _build_optimizer(self):
         """
         Builds the training-relevant part of the graph.
         """
 
-        with tf.name_scope('optimizer'):
+        with tf.name_scope('optimizer') as scope:
             # Create a training step counter.
-            global_step = tf.Variable(0, trainable=False, name='global_step')
+            global_step = tf.Variable(0, trainable=False, name=scope +'global_step')
             # Create placeholder for the learning rate.
-            learning_rate = tf.placeholder(dtype=tf.float32, shape=[], name='learning_rate')
+            learning_rate = tf.placeholder(dtype=tf.float32, shape=[], name=scope +'learning_rate')
             # Compute the regularizatin loss.
+            # This is a list of the individual loss values, so we still need to sum them up.
             regularization_losses = tf.get_collection(
-                tf.GraphKeys.REGULARIZATION_LOSSES)  # This is a list of the individual loss values, so we still need to sum them up.
-            regularization_loss = tf.add_n(regularization_losses, name='regularization_loss')  # Scalar
+                tf.GraphKeys.REGULARIZATION_LOSSES)
+            regularization_loss = tf.add_n(regularization_losses, name=scope +'regularization_loss')  # Scalar
             # Compute the total loss.
             approximation_loss = tf.reduce_mean(
                 tf.nn.softmax_cross_entropy_with_logits(labels=self.labels, logits=self.fcn8s_output),
-                name='approximation_loss')  # Scalar
-            total_loss = tf.add(approximation_loss, regularization_loss, name='total_loss')
+                name=scope +'approximation_loss')  # Scalar
+            total_loss = tf.add(approximation_loss, regularization_loss, name=scope +'total_loss')
             # Compute the gradients and apply them.
-            optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate, name='adam_optimizer')
-            train_op = optimizer.minimize(total_loss, global_step=global_step, name='train_op')
+            optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate, name=scope +'adam_optimizer')
+            train_op = optimizer.minimize(total_loss, global_step=global_step, name=scope +'train_op')
 
         return total_loss, train_op, learning_rate, global_step
 
@@ -456,9 +458,9 @@ class Inceptionv1FCN8s:
         Builds the prediction-relevant part of the graph.
         '''
 
-        with tf.name_scope('predictor'):
-            softmax_output = tf.nn.softmax(self.fcn8s_output, name='softmax_output')
-            predictions_argmax = tf.argmax(softmax_output, axis=-1, name='predictions_argmax', output_type=tf.int64)
+        with tf.name_scope('predictor') as scope:
+            softmax_output = tf.nn.softmax(self.fcn8s_output, name=scope +'softmax_output')
+            predictions_argmax = tf.argmax(softmax_output, axis=-1, name=scope +'predictions_argmax', output_type=tf.int64)
 
         return softmax_output, predictions_argmax
 
@@ -525,12 +527,12 @@ class Inceptionv1FCN8s:
         Builds the part of the graph that logs summaries for TensorBoard.
         """
 
-        graph = tf.get_default_graph()
+        # graph = tf.get_default_graph()
 
-        add_variable_summaries(variable=graph.get_tensor_by_name('inception_3b_pool_proj/weights:0'),
-                               scope='inception_3b_pool_proj')
-        add_variable_summaries(variable=graph.get_tensor_by_name('inception_3b_pool_proj/biases:0'),
-                               scope='inception_3b_pool_proj')
+        # add_variable_summaries(variable=graph.get_tensor_by_name('inception_3b_pool_proj/weights:0'),
+        #                        scope='inception_3b_pool_proj')
+        # add_variable_summaries(variable=graph.get_tensor_by_name('inception_3b_pool_proj/biases:0'),
+        #                        scope='inception_3b_pool_proj')
 
         # Loss and learning rate.
         tf.summary.scalar('total_loss', self.total_loss)
